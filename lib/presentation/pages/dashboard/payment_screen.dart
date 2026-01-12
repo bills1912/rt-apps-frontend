@@ -28,6 +28,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       setState(() {
         _isLoading = true;
+        _listTagihan.clear(); // Clear list untuk refresh
       });
       final result = await tagihanServices.getAll();
       setState(() {
@@ -90,9 +91,22 @@ class PaymentUser extends StatelessWidget {
 
   final User? _user;
   final List<Tagihan> _listTagihan;
+  
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    
+    // FIX: Cari tagihan yang belum dibayar untuk ditampilkan
+    Tagihan displayTagihan = _listTagihan.last; // Default ke yang terbaru
+    
+    // Cari tagihan pertama yang belum dibayar
+    for (var tagihan in _listTagihan.reversed) {
+      if (tagihan.isPaid == false) {
+        displayTagihan = tagihan;
+        break;
+      }
+    }
+    
     return Container(
       color: ColorList.primary50,
       width: double.infinity,
@@ -137,7 +151,8 @@ class PaymentUser extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      context.push('/tagihan-pay', extra: _listTagihan.last);
+                      // FIX: Kirim tagihan yang belum dibayar
+                      context.push('/tagihan-pay', extra: displayTagihan);
                     },
                     child: Container(
                       width: 90,
@@ -249,8 +264,8 @@ class PaymentUser extends StatelessWidget {
                       0,
                       0,
                       0.5,
-                    ), // RGBA(0,0,0,0.5)
-                    offset: Offset(0, 0), // x = 0, y = 0
+                    ),
+                    offset: Offset(0, 0),
                     blurRadius: 8,
                   ),
                 ],
@@ -268,12 +283,12 @@ class PaymentUser extends StatelessWidget {
                           style: TextStyle(color: Colors.grey),
                         ),
                         Text(
-                          _listTagihan.first.isPaid == true
+                          displayTagihan.isPaid == true
                               ? 'Sudah Dibayar'
                               : 'Belum Dibayar',
                           style: TextStyle(
                             color:
-                                _listTagihan.first.isPaid == true
+                                displayTagihan.isPaid == true
                                     ? Colors.green
                                     : Colors.red,
                           ),
@@ -286,7 +301,7 @@ class PaymentUser extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          'Rp.${_listTagihan.first.totalPrice.toString()}',
+                          'Rp.${displayTagihan.totalPrice.toString()}',
                           style: TextStyle(fontSize: 32),
                         ),
                       ],
@@ -309,11 +324,11 @@ class PaymentUser extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Tagihan Berikutnya'),
+                          Text('Batas Pembayaran'),
                           Text(
                             DateFormat(
                               'dd MMMM yyyy',
-                            ).format(_listTagihan.last.tagihanDate),
+                            ).format(displayTagihan.tagihanDate),
                           ),
                         ],
                       ),
@@ -498,8 +513,8 @@ class PaymentAdmin extends StatelessWidget {
                       0,
                       0,
                       0.5,
-                    ), // RGBA(0,0,0,0.5)
-                    offset: Offset(0, 0), // x = 0, y = 0
+                    ),
+                    offset: Offset(0, 0),
                     blurRadius: 8,
                   ),
                 ],

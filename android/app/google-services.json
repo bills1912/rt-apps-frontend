@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "790846208848",
+    "project_id": "aplikasi-rt-949ce",
+    "storage_bucket": "aplikasi-rt-949ce.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:790846208848:android:370f0062d450dca6ba8a55",
+        "android_client_info": {
+          "package_name": "com.example.rt_app_apk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXw4We7uSkQYBL7PDe44IoL3M_7bKHufE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

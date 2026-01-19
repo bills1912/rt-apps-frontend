@@ -93,10 +93,10 @@ class _DashboardShellState extends State<DashboardShell> {
       if (location.startsWith('/dashboard/payment-processing') ||
           location.startsWith('/dashboard/payment-history')) return 1;
 
-      // Index 2: Data Warga (Ini yang sebelumnya hilang/salah)
+      // Index 2: Data Warga
       if (location.startsWith('/dashboard/data-warga')) return 2;
 
-      // Index 3: Profile (Sebelumnya tertulis return 2)
+      // Index 3: Profile
       if (location.startsWith('/dashboard/profile')) return 3;
 
       return 0;
@@ -122,32 +122,52 @@ class _DashboardShellState extends State<DashboardShell> {
   }
 
   void _onItemTapped(BuildContext context, int index) {
+    final role = _user?.role;
+
+    // RT Role
+    if (role == 'rt') {
+      switch (index) {
+        case 0:
+          context.go('/dashboard/rt-dashboard');
+          break;
+        case 1:
+          context.go('/dashboard/data-warga');
+          break;
+        case 2:
+          context.go('/dashboard/profile');
+          break;
+      }
+      return;
+    }
+
+    // Admin Role
+    if (role == 'admin') {
+      switch (index) {
+        case 0:
+          context.go('/dashboard/payment');
+          break;
+        case 1:
+          context.go('/dashboard/payment-processing');
+          break;
+        case 2:
+          context.go('/dashboard/data-warga');
+          break;
+        case 3:
+          context.go('/dashboard/profile');
+          break;
+      }
+      return;
+    }
+
+    // User Role (default)
     switch (index) {
       case 0:
-      // For RT role, go to RT dashboard instead of payment
-        if (_user != null && _user!.role == 'rt') {
-          context.go('/dashboard/rt-dashboard');
-        } else {
-          context.go('/dashboard/payment');
-        }
+        context.go('/dashboard/payment');
         break;
       case 1:
-        if (_user != null && _user!.role == 'user') {
-          context.go('/dashboard/payment-history');
-        } else if (_user != null && _user!.role == 'rt') {
-          context.go('/dashboard/data-warga');
-        } else {
-          context.go('/dashboard/payment-processing');
-        }
+        context.go('/dashboard/payment-history');
         break;
       case 2:
-        if (_user != null && _user!.role == 'rt' || _user != null && _user!.role == 'user') {
-          context.go('/dashboard/profile');
-        } else {
-          context.go('/dashboard/data-warga');
-        }
-        break;
-      case 3:
         context.go('/dashboard/profile');
         break;
     }
@@ -168,16 +188,15 @@ class _DashboardShellState extends State<DashboardShell> {
         elevation: 0,
         actions: [
           if (_user != null && _user!.role == 'admin')
-            Padding( // Gunakan padding agar tidak terlalu mepet
+            Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: IconButton(
                 onPressed: () {
                   context.push('/dashboard/laporan-keuangan');
                 },
-                // Gunakan icon wallet yang sesuai dengan desain Anda
                 icon: Icon(
                   Icons.account_balance_wallet,
-                  color: Colors.white, // Sesuaikan warna
+                  color: Colors.white,
                   size: 28,
                 ),
                 tooltip: 'Laporan Keuangan',

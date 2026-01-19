@@ -28,7 +28,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       setState(() {
         _isLoading = true;
-        _listTagihan.clear(); // Clear list untuk refresh
+        _listTagihan.clear();
       });
       final result = await tagihanServices.getAll();
       setState(() {
@@ -36,9 +36,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('fetch tagihan failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('fetch tagihan failed: $e')),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -54,6 +54,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
       setState(() {
         _user = user;
       });
+
+      // ⚠️ REDIRECT RT ROLE KE DASHBOARD MEREKA
+      if (user.role == 'rt' && mounted) {
+        // Gunakan Future.microtask untuk menghindari setState during build
+        Future.microtask(() {
+          if (mounted) {
+            context.go('/dashboard/rt-dashboard');
+          }
+        });
+      }
     }
   }
 
@@ -66,18 +76,41 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
+    // Show loading while checking user role
+    if (_user == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
-    // Check user role first before checking empty state
-    if (_user != null && _user!.role == 'admin') {
+    // If RT role, show loading (akan di-redirect di _loadUser)
+    if (_user!.role == 'rt') {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Redirecting to RT Dashboard...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Admin Role
+    if (_user!.role == 'admin') {
       return PaymentAdmin(user: _user, listTagihan: _listTagihan);
     }
 
-    // For regular users, show empty state if no tagihan
+    // User Role - check empty state
     if (_listTagihan.isEmpty) {
-      return Center(child: Text('Belum ada tagihan baru'));
+      return const Center(child: Text('Belum ada tagihan baru'));
     }
 
     return PaymentUser(user: _user, listTagihan: _listTagihan);
@@ -86,27 +119,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
 class PaymentUser extends StatelessWidget {
   const PaymentUser({super.key, User? user, required List<Tagihan> listTagihan})
-    : _user = user,
-      _listTagihan = listTagihan;
+      : _user = user,
+        _listTagihan = listTagihan;
 
   final User? _user;
   final List<Tagihan> _listTagihan;
-  
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
-    // FIX: Cari tagihan yang belum dibayar untuk ditampilkan
-    Tagihan displayTagihan = _listTagihan.last; // Default ke yang terbaru
-    
-    // Cari tagihan pertama yang belum dibayar
+
+    Tagihan displayTagihan = _listTagihan.last;
+
     for (var tagihan in _listTagihan.reversed) {
       if (tagihan.isPaid == false) {
         displayTagihan = tagihan;
         break;
       }
     }
-    
+
     return Container(
       color: ColorList.primary50,
       width: double.infinity,
@@ -151,7 +182,6 @@ class PaymentUser extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      // FIX: Kirim tagihan yang belum dibayar
                       context.push('/tagihan-pay', extra: displayTagihan);
                     },
                     child: Container(
@@ -165,11 +195,7 @@ class PaymentUser extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.wallet,
-                            size: 42,
-                            color: ColorList.primary900,
-                          ),
+                          Icon(Icons.wallet, size: 42, color: ColorList.primary900),
                           Flexible(
                             child: Text(
                               'Pembayaran\nIuran',
@@ -181,39 +207,6 @@ class PaymentUser extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (_user != null && _user!.role == 'admin')
-                    GestureDetector(
-                      onTap: () {
-                        context.push('/dashboard/laporan-keuangan');
-                      },
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Color.fromARGB(33, 76, 175, 80),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.account_balance_wallet,
-                              size: 42,
-                              color: Colors.green.shade700,
-                            ),
-                            SizedBox(height: 4),
-                            Flexible(
-                              child: Text(
-                                'Laporan\nKeuangan',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   GestureDetector(
                     onTap: () {
                       context.push('/dashboard/payment-processing');
@@ -229,11 +222,7 @@ class PaymentUser extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.list,
-                            size: 42,
-                            color: ColorList.primary900,
-                          ),
+                          Icon(Icons.list, size: 42, color: ColorList.primary900),
                           Flexible(
                             child: Text(
                               'Tagihan\nIuran',
@@ -245,7 +234,6 @@ class PaymentUser extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   GestureDetector(
                     onTap: () {
                       context.push('/informasi-pembayaran');
@@ -261,11 +249,7 @@ class PaymentUser extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.receipt_long,
-                            size: 42,
-                            color: ColorList.primary900,
-                          ),
+                          Icon(Icons.receipt_long, size: 42, color: ColorList.primary900),
                           Flexible(
                             child: Text(
                               'Informasi Pembayaran',
@@ -292,12 +276,7 @@ class PaymentUser extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color.fromRGBO(
-                      0,
-                      0,
-                      0,
-                      0.5,
-                    ),
+                    color: const Color.fromRGBO(0, 0, 0, 0.5),
                     offset: Offset(0, 0),
                     blurRadius: 8,
                   ),
@@ -311,19 +290,11 @@ class PaymentUser extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Text('Detail Tagihan Anda', style: TextStyle(color: Colors.grey)),
                         Text(
-                          'Detail Tagihan Anda',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        Text(
-                          displayTagihan.isPaid == true
-                              ? 'Sudah Dibayar'
-                              : 'Belum Dibayar',
+                          displayTagihan.isPaid == true ? 'Sudah Dibayar' : 'Belum Dibayar',
                           style: TextStyle(
-                            color:
-                                displayTagihan.isPaid == true
-                                    ? Colors.green
-                                    : Colors.red,
+                            color: displayTagihan.isPaid == true ? Colors.green : Colors.red,
                           ),
                         ),
                       ],
@@ -358,11 +329,7 @@ class PaymentUser extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Batas Pembayaran'),
-                          Text(
-                            DateFormat(
-                              'dd MMMM yyyy',
-                            ).format(displayTagihan.tagihanDate),
-                          ),
+                          Text(DateFormat('dd MMMM yyyy').format(displayTagihan.tagihanDate)),
                         ],
                       ),
                     ),
@@ -382,8 +349,8 @@ class PaymentAdmin extends StatelessWidget {
     super.key,
     required User? user,
     required List<Tagihan> listTagihan,
-  }) : _user = user,
-       _listTagihan = listTagihan;
+  })  : _user = user,
+        _listTagihan = listTagihan;
 
   final User? _user;
   final List<Tagihan> _listTagihan;
@@ -448,11 +415,7 @@ class PaymentAdmin extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.wallet,
-                            size: 42,
-                            color: ColorList.primary900,
-                          ),
+                          Icon(Icons.wallet, size: 42, color: ColorList.primary900),
                           Flexible(
                             child: Text(
                               'Buat\nTagihan',
@@ -479,11 +442,7 @@ class PaymentAdmin extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.list,
-                            size: 42,
-                            color: ColorList.primary900,
-                          ),
+                          Icon(Icons.list, size: 42, color: ColorList.primary900),
                           Flexible(
                             child: Text(
                               'Konfirmasi\nPembayaran',
@@ -510,11 +469,7 @@ class PaymentAdmin extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.receipt_long,
-                            size: 42,
-                            color: ColorList.primary900,
-                          ),
+                          Icon(Icons.receipt_long, size: 42, color: ColorList.primary900),
                           Flexible(
                             child: Text(
                               'Informasi Pembayaran',
@@ -541,12 +496,7 @@ class PaymentAdmin extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color.fromRGBO(
-                      0,
-                      0,
-                      0,
-                      0.5,
-                    ),
+                    color: const Color.fromRGBO(0, 0, 0, 0.5),
                     offset: Offset(0, 0),
                     blurRadius: 8,
                   ),

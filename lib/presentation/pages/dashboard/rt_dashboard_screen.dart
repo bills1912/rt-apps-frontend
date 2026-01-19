@@ -31,6 +31,10 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
   @override
   void initState() {
     super.initState();
+    // Set default month to current month
+    final currentMonth = DateTime.now().month - 1;
+    _selectedMonth = _months[currentMonth];
+
     _loadUser();
     _fetchStats();
   }
@@ -50,18 +54,28 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
     });
 
     try {
-      final stats = await dataWargaService.getPaymentStats();
-      setState(() {
-        _stats = stats;
-      });
+      // Fetch stats with selected month filter
+      print('📊 Fetching stats for month: $_selectedMonth');
+      final stats = await dataWargaService.getPaymentStats(month: _selectedMonth);
+      if (mounted) {
+        setState(() {
+          _stats = stats;
+        });
+        print('✅ Stats loaded: ${stats.monthlyStats[_selectedMonth]?.paid ?? 0} paid out of ${stats.totalWarga}');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat data: $e')),
-      );
+      print('❌ Error fetching stats: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data: $e')),
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -72,7 +86,7 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
     return Scaffold(
       backgroundColor: ColorList.primary50,
       body: SafeArea(
-        child: _isLoading
+        child: _isLoading && _stats == null
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
           child: Column(
@@ -156,6 +170,8 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
                                 setState(() {
                                   _selectedMonth = value;
                                 });
+                                // Refresh data when month changes
+                                _fetchStats();
                               }
                             },
                           ),
@@ -176,7 +192,7 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
                         title: 'Lihat Data Warga',
                         subtitle: 'Status pembayaran per warga',
                         onTap: () {
-                          context.push('/data-warga');
+                          context.push('/dashboard/data-warga');
                         },
                       ),
                       const SizedBox(height: 12),
@@ -185,7 +201,7 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
                         title: 'Laporan Keuangan',
                         subtitle: 'Lihat laporan lengkap',
                         onTap: () {
-                          // Navigate to financial report
+                          context.push('/dashboard/laporan-keuangan');
                         },
                       ),
                     ],
@@ -203,10 +219,15 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
     final monthStats = _stats!.monthlyStats[_selectedMonth];
 
     if (monthStats == null) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Text('Data tidak tersedia'),
+          padding: const EdgeInsets.all(16),
+          child: Center(
+            child: Text(
+              'Data tidak tersedia untuk bulan $_selectedMonth',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
         ),
       );
     }

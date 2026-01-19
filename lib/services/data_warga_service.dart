@@ -44,8 +44,17 @@ class DataWargaService {
         throw Exception(body['error']);
       }
 
-      return PaymentStats.fromJson(body['data']);
+      // Handle response structure
+      var statsData = body['data'];
+
+      // If statsData is a string, parse it
+      if (statsData is String) {
+        statsData = jsonDecode(statsData);
+      }
+
+      return PaymentStats.fromJson(statsData);
     } catch (e) {
+      print('Error in getPaymentStats: $e');
       rethrow;
     }
   }

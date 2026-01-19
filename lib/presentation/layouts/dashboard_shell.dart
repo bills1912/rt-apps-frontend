@@ -81,13 +81,41 @@ class _DashboardShellState extends State<DashboardShell> {
 
   int _calculateSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
+    final role = _user?.role;
 
-    if (location.startsWith('/dashboard/payment-history') ||
-        (_user?.role == 'admin' &&
-            location.startsWith('/dashboard/payment-processing'))) return 1;
-    if (location.startsWith('/dashboard/payment') ||
-        (_user?.role == 'admin' &&
-            location.startsWith('/dashboard/payment-admin-list'))) return 0;
+    // --- LOGIKA KHUSUS ADMIN (4 Tombol) ---
+    if (role == 'admin') {
+      // Index 0: Home
+      if (location.startsWith('/dashboard/payment') ||
+          location.startsWith('/dashboard/payment-admin-list')) return 0;
+
+      // Index 1: List / Payment Processing
+      if (location.startsWith('/dashboard/payment-processing') ||
+          location.startsWith('/dashboard/payment-history')) return 1;
+
+      // Index 2: Data Warga (Ini yang sebelumnya hilang/salah)
+      if (location.startsWith('/dashboard/data-warga')) return 2;
+
+      // Index 3: Profile (Sebelumnya tertulis return 2)
+      if (location.startsWith('/dashboard/profile')) return 3;
+
+      return 0;
+    }
+
+    // --- LOGIKA KHUSUS RT (3 Tombol) ---
+    if (role == 'rt') {
+      if (location.startsWith('/dashboard/rt-dashboard')) return 0;
+      if (location.startsWith('/dashboard/data-warga')) return 1;
+      if (location.startsWith('/dashboard/profile')) return 2;
+      return 0;
+    }
+
+    // --- LOGIKA KHUSUS USER BIASA (3 Tombol) ---
+    // Index 0: Home
+    if (location.startsWith('/dashboard/payment')) return 0;
+    // Index 1: History
+    if (location.startsWith('/dashboard/payment-history')) return 1;
+    // Index 2: Profile
     if (location.startsWith('/dashboard/profile')) return 2;
 
     return 0;
@@ -96,16 +124,30 @@ class _DashboardShellState extends State<DashboardShell> {
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
-        context.go('/dashboard/payment');
+      // For RT role, go to RT dashboard instead of payment
+        if (_user != null && _user!.role == 'rt') {
+          context.go('/dashboard/rt-dashboard');
+        } else {
+          context.go('/dashboard/payment');
+        }
+        break;
       case 1:
         if (_user != null && _user!.role == 'user') {
           context.go('/dashboard/payment-history');
-          break;
+        } else if (_user != null && _user!.role == 'rt') {
+          context.go('/dashboard/data-warga');
         } else {
           context.go('/dashboard/payment-processing');
-          break;
         }
+        break;
       case 2:
+        if (_user != null && _user!.role == 'rt' || _user != null && _user!.role == 'user') {
+          context.go('/dashboard/profile');
+        } else {
+          context.go('/dashboard/data-warga');
+        }
+        break;
+      case 3:
         context.go('/dashboard/profile');
         break;
     }
@@ -125,6 +167,22 @@ class _DashboardShellState extends State<DashboardShell> {
         ),
         elevation: 0,
         actions: [
+          if (_user != null && _user!.role == 'admin')
+            Padding( // Gunakan padding agar tidak terlalu mepet
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                onPressed: () {
+                  context.push('/dashboard/laporan-keuangan');
+                },
+                // Gunakan icon wallet yang sesuai dengan desain Anda
+                icon: Icon(
+                  Icons.account_balance_wallet,
+                  color: Colors.white, // Sesuaikan warna
+                  size: 28,
+                ),
+                tooltip: 'Laporan Keuangan',
+              ),
+            ),
           if (_user != null && _user!.role == 'user')
             Stack(
               children: [
@@ -192,6 +250,16 @@ class _DashboardShellState extends State<DashboardShell> {
           if (_user != null && _user!.role == 'admin')
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
+              label: '',
+            ),
+          if (_user != null && _user!.role == 'rt')
+            BottomNavigationBarItem(
+              icon: Icon(Icons.people),
+              label: '',
+            ),
+          if (_user != null && _user!.role == 'admin')
+            BottomNavigationBarItem(
+              icon: Icon(Icons.people),
               label: '',
             ),
           BottomNavigationBarItem(

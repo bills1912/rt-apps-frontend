@@ -181,6 +181,39 @@ class PaymentUser extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (_user != null && _user!.role == 'admin')
+                    GestureDetector(
+                      onTap: () {
+                        context.push('/dashboard/laporan-keuangan');
+                      },
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Color.fromARGB(33, 76, 175, 80),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet,
+                              size: 42,
+                              color: Colors.green.shade700,
+                            ),
+                            SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                'Laporan\nKeuangan',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   GestureDetector(
                     onTap: () {
                       context.push('/dashboard/payment-processing');

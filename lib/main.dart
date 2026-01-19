@@ -9,6 +9,7 @@ import 'package:rt_app_apk/models/tagihan_user.dart';
 import 'package:rt_app_apk/presentation/layouts/dashboard_shell.dart';
 import 'package:rt_app_apk/presentation/pages/auth/signin_screen.dart';
 import 'package:rt_app_apk/presentation/pages/auth/signup_screen.dart';
+import 'package:rt_app_apk/presentation/pages/dashboard/laporan_keuangan_screen.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/notification_list_screen.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/payment_add_item.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/payment_admin_screen.dart';
@@ -22,6 +23,8 @@ import 'package:rt_app_apk/presentation/pages/dashboard/payment_screen.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/payment_tagihan_user_screen.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/payment_update_user_screen.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/profile_screen.dart';
+import 'package:rt_app_apk/presentation/pages/dashboard/data_warga_screen.dart';
+import 'package:rt_app_apk/presentation/pages/dashboard/rt_dashboard_screen.dart';
 
 import 'package:rt_app_apk/presentation/pages/dashboard/payment_update_admin_screen.dart';
 import 'package:rt_app_apk/presentation/pages/modal/success_modal.dart';
@@ -181,6 +184,18 @@ final GoRouter _router = GoRouter(
           path: '/dashboard/payment-admin-list',
           builder: (_, _) => PaymentScreenAdmin(),
         ),
+        GoRoute(
+          path: '/dashboard/data-warga',
+          builder: (_, _) => const DataWargaScreen(),
+        ),
+        GoRoute(
+          path: '/dashboard/rt-dashboard',
+          builder: (_, _) => const RTDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/dashboard/laporan-keuangan',
+          builder: (_, _) => const LaporanKeuanganScreen(),
+        ),
       ],
     ),
     GoRoute(
@@ -246,6 +261,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/success-modal',
       builder: (_, _) => SuccessModal(),
+    ),
+    GoRoute(
+      path: '/data-warga',
+      builder: (_, _) => const DataWargaScreen(),
     ),
   ],
 );

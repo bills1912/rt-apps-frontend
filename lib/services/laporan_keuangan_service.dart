@@ -167,4 +167,79 @@ class LaporanKeuanganService {
       rethrow;
     }
   }
+
+  Future<bool> publishToWarga({required String periode}) async {
+    try {
+      final response = await _apiServices.dio.post(
+        '/laporan-keuangan/publish',
+        data: {'periode': periode},
+      );
+      final body = response.data;
+
+      if (body['error'] != null) {
+        throw Exception(body['error']);
+      }
+
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get published reports (for users)
+  Future<List<LaporanKeuangan>> getPublishedReports({String? periode}) async {
+    try {
+      final queryParams = periode != null ? {'periode': periode} : null;
+
+      final response = await _apiServices.dio.get(
+        '/laporan-keuangan/published',
+        queryParameters: queryParams,
+      );
+      final body = response.data;
+
+      if (body['error'] != null) {
+        throw Exception(body['error']);
+      }
+
+      var dataList = body['data'];
+      if (dataList is String) {
+        dataList = jsonDecode(dataList);
+      }
+
+      final data = (dataList as List)
+          .map((e) => LaporanKeuangan.fromJson(e))
+          .toList();
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<LaporanSummary>> getPublishedSummary({String? periode}) async {
+    try {
+      final queryParams = periode != null ? {'periode': periode} : null;
+
+      final response = await _apiServices.dio.get(
+        '/laporan-keuangan/published/summary',
+        queryParameters: queryParams,
+      );
+      final body = response.data;
+
+      if (body['error'] != null) {
+        throw Exception(body['error']);
+      }
+
+      var dataList = body['data'];
+      if (dataList is String) {
+        dataList = jsonDecode(dataList);
+      }
+
+      final data = (dataList as List)
+          .map((e) => LaporanSummary.fromJson(e))
+          .toList();
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

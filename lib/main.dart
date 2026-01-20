@@ -12,6 +12,7 @@ import 'package:rt_app_apk/presentation/layouts/dashboard_shell.dart';
 import 'package:rt_app_apk/presentation/pages/auth/signin_screen.dart';
 import 'package:rt_app_apk/presentation/pages/auth/signup_screen.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/laporan_keuangan_screen.dart';
+import 'package:rt_app_apk/presentation/pages/dashboard/laporan_keuangan_user_screen.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/notification_list_screen.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/payment_add_item.dart';
 import 'package:rt_app_apk/presentation/pages/dashboard/payment_admin_screen.dart';
@@ -200,6 +201,10 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: '/dashboard/laporan-keuangan',
           builder: (_, _) => const LaporanKeuanganScreen(),
+        ),
+        GoRoute(
+          path: '/laporan-keuangan-warga',
+          builder: (_, _) => const LaporanKeuanganUserScreen(),
         ),
       ],
     ),

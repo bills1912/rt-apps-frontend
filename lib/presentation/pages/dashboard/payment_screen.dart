@@ -261,6 +261,34 @@ class PaymentUser extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // Tambahkan tombol baru di dashboard user
+                  GestureDetector(
+                    onTap: () {
+                      context.push('/laporan-keuangan-warga');
+                    },
+                    child: Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Color.fromARGB(33, 140, 198, 246),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.assessment, size: 42, color: ColorList.primary900),
+                          Flexible(
+                            child: Text(
+                              'Laporan\nKeuangan',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

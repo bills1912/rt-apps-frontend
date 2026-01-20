@@ -186,14 +186,12 @@ class LaporanKeuanganService {
     }
   }
 
-  // Get published reports (for users)
-  Future<List<LaporanKeuangan>> getPublishedReports({String? periode}) async {
+  // Get published reports (for users) - with required periode
+  Future<List<LaporanKeuangan>> getPublishedReports({required String periode}) async {
     try {
-      final queryParams = periode != null ? {'periode': periode} : null;
-
       final response = await _apiServices.dio.get(
         '/laporan-keuangan/published',
-        queryParameters: queryParams,
+        queryParameters: {'periode': periode},
       );
       final body = response.data;
 
@@ -215,13 +213,11 @@ class LaporanKeuanganService {
     }
   }
 
-  Future<List<LaporanSummary>> getPublishedSummary({String? periode}) async {
+  Future<List<LaporanSummary>> getPublishedSummary({required String periode}) async {
     try {
-      final queryParams = periode != null ? {'periode': periode} : null;
-
       final response = await _apiServices.dio.get(
         '/laporan-keuangan/published/summary',
-        queryParameters: queryParams,
+        queryParameters: {'periode': periode},
       );
       final body = response.data;
 

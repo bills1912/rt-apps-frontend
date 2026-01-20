@@ -176,9 +176,11 @@ class PaymentUser extends StatelessWidget {
                 ),
               ),
               padding: EdgeInsets.only(top: 100, left: 40, right: 40),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // PERBAIKAN DI SINI: Ganti Row menjadi Wrap
+              child: Wrap(
+                spacing: 20, // Jarak horizontal antar item
+                runSpacing: 20, // Jarak vertikal jika turun baris (ke bawah)
+                alignment: WrapAlignment.spaceBetween, // Mengatur rata kiri-kanan
                 children: [
                   GestureDetector(
                     onTap: () {
@@ -261,7 +263,6 @@ class PaymentUser extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Tambahkan tombol baru di dashboard user
                   GestureDetector(
                     onTap: () {
                       context.push('/laporan-keuangan-warga');

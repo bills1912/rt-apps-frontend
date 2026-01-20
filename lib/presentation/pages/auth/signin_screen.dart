@@ -150,112 +150,114 @@ class _SigninScreenState extends State<SigninScreen> {
                   ),
                 ),
                 padding: EdgeInsets.only(top: 53, left: 20, right: 20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Email
-                      Text('Nomor Kartu Keluarga'),
-                      SizedBox(height: 14),
-                      TextFormField(
-                        controller: _kkController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Color.fromARGB(255, 230, 230, 230),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'KK is required';
-                          }
-                          if (value.length != 16) {
-                            return 'KK must be 16 digits';
-                          }
-                          if (int.tryParse(value) == null) {
-                            return 'KK must be numeric';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      Text('Password'),
-                      SizedBox(height: 14),
-                      // Password
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obsecureText,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Color.fromARGB(255, 230, 230, 230),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: BorderSide.none,
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _obsecureText = !_obsecureText;
-                              });
-                            },
-                            icon: Icon(
-                              _obsecureText
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Password is required';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 46),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _submit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorList.primary,
-                            shape: RoundedRectangleBorder(
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Email
+                        Text('Nomor Kartu Keluarga'),
+                        SizedBox(height: 14),
+                        TextFormField(
+                          controller: _kkController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Color.fromARGB(255, 230, 230, 230),
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide.none,
                             ),
                           ),
-                          child:
-                              _isLoading
-                                  ? CircularProgressIndicator()
-                                  : Text(
-                                    'Login',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'KK is required';
+                            }
+                            if (value.length != 16) {
+                              return 'KK must be 16 digits';
+                            }
+                            if (int.tryParse(value) == null) {
+                              return 'KK must be numeric';
+                            }
+                            return null;
+                          },
                         ),
-                      ),
-                      SizedBox(height: 31),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Belum punya akun?'),
-                          SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () => context.go('/sign-up'),
-                            child: Text('Sign Up', style: TextStyles.link),
+                        const SizedBox(height: 16),
+                        Text('Password'),
+                        SizedBox(height: 14),
+                        // Password
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obsecureText,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Color.fromARGB(255, 230, 230, 230),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide.none,
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _obsecureText = !_obsecureText;
+                                });
+                              },
+                              icon: Icon(
+                                _obsecureText
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Password is required';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 46),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _submit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ColorList.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            child:
+                            _isLoading
+                                ? CircularProgressIndicator()
+                                : Text(
+                              'Login',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 31),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Belum punya akun?'),
+                            SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () => context.go('/sign-up'),
+                              child: Text('Sign Up', style: TextStyles.link),
+                            ),
+                          ],
+                        ),
 
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      // Sign In Button
-                    ],
+                        // Sign In Button
+                      ],
+                    ),
                   ),
-                ),
+                )
               ),
             ),
           ],

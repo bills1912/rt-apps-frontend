@@ -54,14 +54,28 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
     });
 
     try {
-      // Fetch stats with selected month filter
       print('📊 Fetching stats for month: $_selectedMonth');
+
+      // PERBAIKAN: Pastikan month dikirim ke API
       final stats = await dataWargaService.getPaymentStats(month: _selectedMonth);
+
       if (mounted) {
         setState(() {
           _stats = stats;
         });
-        print('✅ Stats loaded: ${stats.monthlyStats[_selectedMonth]?.paid ?? 0} paid out of ${stats.totalWarga}');
+
+        // Debug logging
+        print('✅ Stats loaded successfully');
+        print('Total Warga: ${stats.totalWarga}');
+
+        if (stats.monthlyStats.containsKey(_selectedMonth)) {
+          final monthData = stats.monthlyStats[_selectedMonth]!;
+          print('Month: $_selectedMonth');
+          print('Paid: ${monthData.paid}');
+          print('Unpaid: ${monthData.unpaid}');
+        } else {
+          print('⚠️ No data for month: $_selectedMonth');
+        }
       }
     } catch (e) {
       print('❌ Error fetching stats: $e');
@@ -87,7 +101,7 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
       backgroundColor: ColorList.primary50,
       body: SafeArea(
         child: _isLoading && _stats == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator(color: Colors.white))
             : SingleChildScrollView(
           child: Column(
             children: [
@@ -125,6 +139,9 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
               // Content Card
               Container(
                 width: double.infinity,
+                constraints: BoxConstraints(
+                  minHeight: size.height - 200,
+                ),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -170,7 +187,7 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
                                 setState(() {
                                   _selectedMonth = value;
                                 });
-                                // Refresh data when month changes
+                                // PERBAIKAN: Refresh data saat bulan berubah
                                 _fetchStats();
                               }
                             },
@@ -180,9 +197,22 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Statistics
+                      // Statistics Card
                       if (_stats != null) ...[
                         _buildStatsCard(),
+                        const SizedBox(height: 24),
+                      ] else if (!_isLoading) ...[
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Center(
+                              child: Text(
+                                'Belum ada data',
+                                style: TextStyle(color: Colors.grey.shade600),
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 24),
                       ],
 
@@ -216,16 +246,28 @@ class _RTDashboardScreenState extends State<RTDashboardScreen> {
   }
 
   Widget _buildStatsCard() {
+    // PERBAIKAN: Better null checking dan data handling
     final monthStats = _stats!.monthlyStats[_selectedMonth];
 
-    if (monthStats == null) {
+    if (monthStats == null || _stats!.totalWarga == 0) {
       return Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Center(
-            child: Text(
-              'Data tidak tersedia untuk bulan $_selectedMonth',
-              style: TextStyle(color: Colors.grey.shade600),
+            child: Column(
+              children: [
+                Icon(Icons.info_outline, size: 48, color: Colors.grey.shade400),
+                const SizedBox(height: 12),
+                Text(
+                  'Data tidak tersedia untuk bulan $_selectedMonth',
+                  style: TextStyle(color: Colors.grey.shade600),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),

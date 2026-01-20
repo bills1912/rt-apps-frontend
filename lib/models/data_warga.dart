@@ -69,17 +69,48 @@ class PaymentStats {
     required this.monthlyStats,
   });
 
-  factory PaymentStats.fromJson(Map<String, dynamic> json) {
+  factory PaymentStats.fromJson(dynamic json) {
+    // PERBAIKAN: Accept dynamic and convert safely
+    final Map<String, dynamic> data = json is Map<String, dynamic>
+        ? json
+        : Map<String, dynamic>.from(json as Map);
+
     Map<String, MonthStats> stats = {};
 
-    if (json['monthlyStats'] != null && json['monthlyStats'] is Map) {
-      json['monthlyStats'].forEach((key, value) {
-        stats[key.toString()] = MonthStats.fromJson(value);
-      });
+    if (data['monthlyStats'] != null) {
+      final monthlyStatsRaw = data['monthlyStats'];
+
+      if (monthlyStatsRaw is Map) {
+        monthlyStatsRaw.forEach((key, value) {
+          try {
+            if (value != null) {
+              // Safely convert each value to Map<String, dynamic>
+              final Map<String, dynamic> valueMap;
+
+              if (value is Map<String, dynamic>) {
+                valueMap = value;
+              } else if (value is Map) {
+                valueMap = {
+                  'paid': value['paid'],
+                  'unpaid': value['unpaid'],
+                };
+              } else {
+                return; // Skip invalid entries
+              }
+
+              stats[key.toString()] = MonthStats.fromJson(valueMap);
+            }
+          } catch (e) {
+            print('Error parsing month stats for $key: $e');
+          }
+        });
+      }
     }
 
     return PaymentStats(
-      totalWarga: json['totalWarga'] ?? 0,
+      totalWarga: data['totalWarga'] is int
+          ? data['totalWarga']
+          : int.tryParse(data['totalWarga']?.toString() ?? '0') ?? 0,
       monthlyStats: stats,
     );
   }
@@ -96,8 +127,12 @@ class MonthStats {
 
   factory MonthStats.fromJson(Map<String, dynamic> json) {
     return MonthStats(
-      paid: json['paid'] ?? 0,
-      unpaid: json['unpaid'] ?? 0,
+      paid: json['paid'] is int
+          ? json['paid']
+          : int.tryParse(json['paid']?.toString() ?? '0') ?? 0,
+      unpaid: json['unpaid'] is int
+          ? json['unpaid']
+          : int.tryParse(json['unpaid']?.toString() ?? '0') ?? 0,
     );
   }
 
